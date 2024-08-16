@@ -1,0 +1,16 @@
+[package]
+name = "rpcserver"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio.workspace = true
+jsonrpsee.workspace = true
+anyhow.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+futures.workspace = true
+http-body-util = "0.1"
+http-body = "1"
+console-subscriber = "0.4.0"
+core_rpc = { path = "../core_rpc" }
