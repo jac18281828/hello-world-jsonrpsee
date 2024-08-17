@@ -1,7 +1,13 @@
 use hyper::Method;
+
+use jsonrpsee::core::RpcResult;
 use jsonrpsee::server::{RpcModule, Server};
 use std::net::SocketAddr;
 use tower_http::cors::{Any, CorsLayer};
+
+async fn handle_hello() -> RpcResult<&'static str> {
+    Ok("Hello there!!")
+}
 
 pub async fn run_server() -> anyhow::Result<SocketAddr> {
     // Add a CORS middleware for handling HTTP requests.
@@ -26,10 +32,7 @@ pub async fn run_server() -> anyhow::Result<SocketAddr> {
         .await?;
 
     let mut module = RpcModule::new(());
-    module.register_method("say_hello", |_, _, _| {
-        tracing::info!("say_hello method called!");
-        "Hello there!!"
-    })?;
+    module.register_async_method("say_hello", |_, _, _| async move { handle_hello().await })?;
 
     let addr = server.local_addr()?;
     let handle = server.start(module);
@@ -39,4 +42,15 @@ pub async fn run_server() -> anyhow::Result<SocketAddr> {
     tokio::spawn(handle.stopped());
 
     Ok(addr)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[tokio::test]
+    async fn test_handle_hello() {
+        let response = handle_hello().await.unwrap();
+        assert_eq!(response, "Hello there!!");
+    }
 }
